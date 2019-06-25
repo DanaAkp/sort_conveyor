@@ -39,6 +39,7 @@
 #include "opencv2/videoio/videoio_c.h"
 #include "opencv2/videoio/registry.hpp"
 //#include "opencv2/videoio/cap_ios.h"
+#include <Windows.h>
 #include <stdarg.h>
 #include "opencv2/core/cuda.hpp"
 #include "opencv2/core/bindings_utils.hpp"
@@ -64,50 +65,56 @@
 
 using namespace cv;
 using namespace std;
+
 int main(int argc, char* argv[])
 {
-	// получаем любую подключённую камеру
-	CvCapture* capture= cvCreateCameraCapture(1); //cvCaptureFromCAM( 0 );
-//	assert(capture);
+	//	//Open the default video camera
+	VideoCapture cap(1);
+	//
+	//	// if not success, exit program
+	if (cap.isOpened() == false)
+	{
+		cout << "Cannot open the video camera" << endl;
+		cin.get(); //wait for any key press
+		return -1;
+	}
+	//
+	double dWidth = cap.get(CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+	double dHeight = cap.get(CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+	//
+	cout << "Resolution of the video : " << dWidth << " x " << dHeight << endl;
+	//
+	//	string window_name = "My Camera Feed";
+	namedWindow("444"); //create a window called "My Camera Feed"
+	//
+	while (true)
+	{
+		Mat frame;
+		bool bSuccess = cap.read(frame); // read a new frame from video 
 
-	//cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 640);//1280); 
-	//cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 480);//960); 
-
-	// узнаем ширину и высоту кадра
-	double width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-	double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-	printf("[i] %.0f x %.0f\n", width, height);
-
-	IplImage* frame = 0;
-
-	cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
-
-	printf("[i] press Enter for capture image and Esc for quit!\n\n");
-
-	int counter = 0;
-	char filename[512];
-
-	while (true) {
-		// получаем кадр
-		frame = cvQueryFrame(capture);
-
-		// показываем
-		cvShowImage("capture", frame);
-
-		char c = cvWaitKey(33);
-		if (c == 27) { // нажата ESC
+		//Breaking the while loop if the frames cannot be captured
+		if (bSuccess == false)
+		{
+			cout << "Video camera is disconnected" << endl;
+			cin.get(); //Wait for any key press
 			break;
 		}
-		else if (c == 13) { // Enter
-				// сохраняем кадр в файл
-			printf(filename, "Image%d.jpg", counter);
-			printf("[i] capture... %s\n", filename);
-			//cvSaveImage(filename, frame);
-			counter++;
+
+		//show the frame in the created window
+		imshow("444", frame);
+		
+		MessageBox ( NULL, "Hello World!", "Test", MB_OK );
+
+		//		//wait for for 10 ms until any key is pressed. 
+		//		//If the 'Esc' key is pressed, break the while loop.
+		//		//If the any other key is pressed, continue the loop 
+		//		//If any key is not pressed withing 10 ms, continue the loop 
+		if (waitKey(10) == 27)
+		{
+			cout << "Esc key is pressed by user. Stoppig the video" << endl;
+			break;
 		}
 	}
-	// освобождаем ресурсы
-	cvReleaseCapture(&capture);
-	cvDestroyWindow("capture");
+	//
 	return 0;
 }
