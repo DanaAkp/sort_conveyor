@@ -86,7 +86,9 @@ int main(int argc, char* argv[])
 	//
 	//	string window_name = "My Camera Feed";
 	namedWindow("444"); //create a window called "My Camera Feed"
-	//
+	Mat frame1;
+	bool bSuccess = cap.read(frame1); // read a new frame from video 
+
 	while (true)
 	{
 		Mat frame;
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
 
 		//show the frame in the created window
 		imshow("444", frame);
-		
+		if(abs(frame1.at<uchar>(300, 300) - frame.at<uchar>(300, 300)) > 20)
 		MessageBox ( NULL, "Hello World!", "Test", MB_OK );
 
 		//		//wait for for 10 ms until any key is pressed. 
